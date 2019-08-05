@@ -1,0 +1,59 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  message list
+
+Resources:
+  AddMessageFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.addMessage
+      Runtime: nodejs8.10
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /messages
+            Method: post
+      Environment:
+        Variables:
+          MessagesTableName:
+            Ref: MessagesTable
+  GetMessagesFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: hello-world/
+      Handler: app.getMessages
+      Runtime: nodejs8.10
+      Policies:
+        - AmazonDynamoDBFullAccess
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /messages
+            Method: get
+      Environment:
+        Variables:
+          MessagesTableName:
+            Ref: MessagesTable
+  MessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "ListId"
+          AttributeType: "S"
+        - AttributeName: "Time"
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: "ListId"
+          KeyType: "HASH"
+        - AttributeName: "Time"
+          KeyType: "RANGE"
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      TableName: Messages
